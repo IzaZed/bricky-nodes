@@ -619,9 +619,13 @@ class BNActuatorNode(bpy.types.Node, BNBasicNode):
         action = body.row()
         action.prop_search(act, 'action', bpy.data, 'actions', text='')
         action.prop(act, 'use_continue_last_frame', text='Continue')
-        frames = body.row()
-        frames.prop(act, 'frame_start', text='Start Frame')
-        frames.prop(act, 'frame_end', text='End Frame')
+        if act.play_mode != 'PROPERTY':
+            frames = body.row()
+            frames.prop(act, 'frame_start', text='Start Frame')
+            frames.prop(act, 'frame_end', text='End Frame')
+        else:
+            frames = body.split(factor=.6)
+            frames.prop_search(act, 'property', self.target_object.game, 'properties', text='Property')
         frames.prop(act, 'apply_to_children', text='Child')
         opts = body.row()
         opts.prop(act, 'frame_blend_in', text='Blendin')
