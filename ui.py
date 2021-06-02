@@ -313,6 +313,8 @@ class BGEBrickTree(bpy.types.NodeTree):
         compare_bricks = {}
         for n in self.nodes:
             if isinstance(n, bricknodes.nodes.BNBasicNode):
+                if n.brick_name != n.target_brick:
+                    n.brick_name = n.target_brick
                 if n.get_brick() not in compare_bricks:
                     compare_bricks[n.get_brick()] = n.target_object.name
 

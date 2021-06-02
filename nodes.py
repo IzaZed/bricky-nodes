@@ -60,6 +60,24 @@ def check_logic_brick(self, context):
     tree = getattr(bpy.context.space_data, 'edit_tree', None)
     if not tree:
         return
+    if self.brick_name != self.get_brick().name:
+        self.brick_name = self.get_brick().name
+    tree.update()
+
+
+def rename_brick(self, context):
+    brick = self.get_brick()
+    old_name = self.target_brick
+    if self.target_brick != self.brick_name:
+        brick.name = self.target_brick = self.brick_name
+    for t in bpy.data.node_groups:
+        if isinstance(t, bricknodes.ui.BGEBrickTree):
+            for n in t.nodes:
+                if n.target_brick == old_name and n.target_object == self.target_object:
+                    n.target_brick = self.brick_name
+    tree = getattr(bpy.context.space_data, 'edit_tree', None)
+    if not tree:
+        return
     tree.update()
 
 
@@ -150,6 +168,7 @@ _sockets.append(BLActuatorSocket)
 class BNBasicNode():
     target_object: bpy.props.PointerProperty(type=bpy.types.Object, update=select_object)
     target_brick: bpy.props.StringProperty(update=check_logic_brick)
+    brick_name: bpy.props.StringProperty(update=rename_brick)
     show_info: bpy.props.BoolProperty(
         default=True,
         name='Expand Selector',
@@ -253,7 +272,7 @@ class BNSensorNode(bpy.types.Node, BNBasicNode):
         if not sensor:
             return
         info.prop(sensor, 'type', text='')
-        info.prop(sensor, 'name', text='')
+        info.prop(self, 'brick_name', text='')
         info.prop(sensor, 'active', text='')
         info.operator('bricknodes.duplicate_brick', text='', icon='DUPLICATE')
         if not self.show_info:
@@ -482,7 +501,7 @@ class BNControllerNode(bpy.types.Node, BNBasicNode):
         if not controller:
             return
         info.prop(controller, 'type', text='')
-        info.prop(controller, 'name', text='')
+        info.prop(self, 'brick_name', text='')
         info.prop(controller, 'use_priority', text='', icon='BOOKMARKS')
         info.prop(controller, 'active', text='')
         info.operator('bricknodes.duplicate_brick', text='', icon='DUPLICATE')
@@ -579,7 +598,7 @@ class BNActuatorNode(bpy.types.Node, BNBasicNode):
         if not actuator:
             return
         info.prop(actuator, 'type', text='')
-        info.prop(actuator, 'name', text='')
+        info.prop(self, 'brick_name', text='')
         info.prop(actuator, 'active', text='')
         info.operator('bricknodes.duplicate_brick', text='', icon='DUPLICATE')
         if not self.show_info:
